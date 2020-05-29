@@ -6,9 +6,9 @@ from common.layers import *
 from common.gradient import numerical_gradient
 from collections import OrderedDict
 
-class Network:
+class MyNetwork:
 
-    def __index__(self, input_size, hidden_size, output_size, weight_init_std=0.01):
+    def __init__(self, input_size, hidden_size, output_size, weight_init_std=1):
         # init weights
         self.params = {}
         self.params['W1'] = weight_init_std * np.random.randn(input_size, hidden_size)
@@ -19,7 +19,7 @@ class Network:
         # creat layers
         self.layers = OrderedDict()
         self.layers['Affine1'] = Affine(self.params['W1'], self.params['b1'])
-        self.layers['sigmoid'] = Sigmoid()
+        self.layers['Sigmoid1'] = Sigmoid()
         self.layers['Affine2'] = Affine(self.params['W2'], self.params['b2'])
         self.lastLayer = SoftmaxWithLoss()
 
@@ -40,6 +40,17 @@ class Network:
         if t.ndim != 1 : t = np.argmax(t, axis=1)
         accuracy = np.sum(y == t) / float(x.shape[0])
         return accuracy
+
+    def numerical_gradient(self, x, t):
+        loss_W = lambda W: self.loss(x, t)
+
+        grads = {}
+        grads['W1'] = numerical_gradient(loss_W, self.params['W1'])
+        grads['b1'] = numerical_gradient(loss_W, self.params['b1'])
+        grads['W2'] = numerical_gradient(loss_W, self.params['W2'])
+        grads['b2'] = numerical_gradient(loss_W, self.params['b2'])
+
+        return grads
 
     def gradient(self, x, t):
         # forward
