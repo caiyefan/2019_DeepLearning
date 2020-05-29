@@ -36,7 +36,7 @@ for i in range(iters_num):
     grad = network.gradient(x_batch, t_batch)
 
      # Update Gradient
-    for key in ('W1', 'b1', 'W2', 'b2'):
+    for key in ('W1', 'b1', 'aa1', 'bb1', 'W2', 'b2'):
         network.params[key] -= learning_rate * grad[key]
 
     loss = network.loss(x_batch, t_batch)
@@ -50,6 +50,7 @@ for i in range(iters_num):
         print(train_acc, test_acc)
 
 print(network.predict(x_train))
+print(network.params['aa1'], network.params['bb1'])
 
 plt.style.use('seaborn-whitegrid')
 plt.plot(train_loss_list, label='Loss')

@@ -23,16 +23,26 @@ class Relu:
 
 
 class Sigmoid:
-    def __init__(self):
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+
         self.out = None
+        self.daa = None
+        self.dbb = None
 
     def forward(self, x):
-        out = sigmoid(x)
+        self.x = x
+        # out = sigmoid(x)
+        out = hp_sigmoid(self.x, self.a, self.b)
         self.out = out
         return out
 
     def backward(self, dout):
-        dx = dout * (1.0 - self.out) * self.out
+        # dx = dout * (1.0 - self.out) * self.out
+        dx = dout * self.a * self.out * (1 - self.out / self.b)
+        self.daa = dout * self.x * self.out * (1 - self.out / self.b)
+        self.dbb = dout * self.out / self.b
 
         return dx
 

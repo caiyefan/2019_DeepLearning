@@ -13,13 +13,15 @@ class MyNetwork:
         self.params = {}
         self.params['W1'] = weight_init_std * np.random.randn(input_size, hidden_size)
         self.params['b1'] = np.zeros(hidden_size)
+        self.params['aa1'] = 1
+        self.params['bb1'] = 1
         self.params['W2'] = weight_init_std * np.random.randn(hidden_size, output_size)
         self.params['b2'] = np.zeros(output_size)
 
         # creat layers
         self.layers = OrderedDict()
         self.layers['Affine1'] = Affine(self.params['W1'], self.params['b1'])
-        self.layers['Sigmoid1'] = Sigmoid()
+        self.layers['Sigmoid1'] = Sigmoid(self.params['aa1'], self.params['bb1'])
         self.layers['Affine2'] = Affine(self.params['W2'], self.params['b2'])
         self.lastLayer = SoftmaxWithLoss()
 
@@ -67,6 +69,7 @@ class MyNetwork:
 
         grads = {}
         grads['W1'], grads['b1'] = self.layers['Affine1'].dW, self.layers['Affine1'].db
+        grads['aa1'], grads['bb1'] = self.layers['Sigmoid1'].daa, self.layers['Sigmoid1'].dbb
         grads['W2'], grads['b2'] = self.layers['Affine2'].dW, self.layers['Affine2'].db
 
         return grads
