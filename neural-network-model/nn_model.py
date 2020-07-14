@@ -108,13 +108,15 @@ class NN_Model():
                                                                                   self.activation_b[j],
                                                                                   type=self.activation_type[j])
 
-    def update(self, lr=0.01):
+    def update(self, lr=0.01, regularization=False):
         # 更新每层的权重，偏差，激活函数变量
         for i in range(self.num_layer):
             j = self.num_layer - i
 
-            self.weights[j - 1] -= (self.X[j - 1].T.dot(self.delta_layer[j])) * lr
-            # self.weights[j - 1] -= (self.X[j - 1].T.dot(self.delta_layer[j]) + 0.01 * self.weights[j - 1]) * lr
+            if regularization:
+                self.weights[j - 1] -= (self.X[j - 1].T.dot(self.delta_layer[j]) + 0.01 * self.weights[j - 1]) * lr
+            else:
+                self.weights[j - 1] -= (self.X[j - 1].T.dot(self.delta_layer[j])) * lr
 
             self.bias[j - 1] -= np.sum(self.delta_layer[j], axis=0, keepdims=True) * lr
 
@@ -123,10 +125,10 @@ class NN_Model():
                 self.activation_a[j] -= np.sum(self.Z[j]*sigmoid(self.Z[j], self.activation_a[j], self.activation_b[j])*(1 - sigmoid(self.Z[j], self.activation_a[j], 1)) * self.error_layer[j], axis=0) * lr
                 self.activation_b[j] -= np.sum(sigmoid(self.Z[j], self.activation_a[j], 1) * self.error_layer[j], axis=0) * lr
 
-    def learning(self, epochs=1, lr=0.1, loss_type="cross entropy"):
-        begin_time = time()
+    def learning(self, epochs=1, lr=0.1, loss_type="cross entropy", regularization=False):
+        begin_time = time.time()
         for e in range(epochs):
-            local_time = time()
+            local_time = time.time()
             right = 0.0
             loss_sum = 0
 
@@ -136,7 +138,7 @@ class NN_Model():
 
                 res = self.forward(input)
                 self.back_propagation(target, loss_type)
-                self.update(lr)
+                self.update(lr, regularization)
 
                 loss_sum += loss_function(target, res, loss_type)
 
@@ -179,22 +181,23 @@ class NN_Model():
             else:
                 self.w_list1 = np.column_stack((self.w_list1, w))
 
-            w1 = np.array(self.weights[1])
-            w = np.array([])
-            for i in range(len(w1)):
-                w = np.append(w, w1[i].flatten())
-            w = w.flatten()
-            if self.w_list2.shape[0] == 0:
-                self.w_list2 = np.append(self.w_list2, w)
-            else:
-                self.w_list2 = np.column_stack((self.w_list2, w))
+            if(len(self.weights)>=2):
+                w1 = np.array(self.weights[1])
+                w = np.array([])
+                for i in range(len(w1)):
+                    w = np.append(w, w1[i].flatten())
+                w = w.flatten()
+                if self.w_list2.shape[0] == 0:
+                    self.w_list2 = np.append(self.w_list2, w)
+                else:
+                    self.w_list2 = np.column_stack((self.w_list2, w))
 
 
-            loss_sum /= len(self.train_y)
+            # loss_sum /= len(self.train_y)
             self.loss_list = np.append(self.loss_list, loss_sum)
             acc = round(right / len(self.train_y) * 100, 2)
             self.acc_list = np.append(self.acc_list, acc)
-            self.cost_time = round((time() - local_time) * 1000, 2)
+            self.cost_time = round((time.time() - local_time) * 1000, 2)
 
             print("[Epoch", e + 1, "/", epochs, end="]")
             print(" -Loss:", round(float(loss_sum), 2), end=",")
@@ -202,16 +205,16 @@ class NN_Model():
             print(" -Time:", self.cost_time, end="ms")
             print('')
 
-        self.cost_time = (time() - begin_time) * 1000
+        self.cost_time = (time.time() - begin_time) * 1000
 
-    def train_dog(self, input, target, lr=0.1, loss_type="mse"):
+    def train_dog(self, input, target, lr=0.1, loss_type="cross entropy", regularization=False):
         right = 0.0
         loss_sum = 0
         r = 0
 
         res = self.forward(input)
         self.back_propagation(target, loss_type)
-        self.update(lr)
+        self.update(lr, regularization)
 
         w0 = np.array(self.weights[0])
         w = np.array([])
@@ -223,15 +226,16 @@ class NN_Model():
         else:
             self.w_list1 = np.column_stack((self.w_list1, w))
 
-        w1 = np.array(self.weights[1])
-        w = np.array([])
-        for i in range(len(w1)):
-            w = np.append(w, w1[i].flatten())
-        w = w.flatten()
-        if self.w_list2.shape[0] == 0:
-            self.w_list2 = np.append(self.w_list2, w)
-        else:
-            self.w_list2 = np.column_stack((self.w_list2, w))
+        if (len(self.weights) >= 2):
+            w1 = np.array(self.weights[1])
+            w = np.array([])
+            for i in range(len(w1)):
+                w = np.append(w, w1[i].flatten())
+            w = w.flatten()
+            if self.w_list2.shape[0] == 0:
+                self.w_list2 = np.append(self.w_list2, w)
+            else:
+                self.w_list2 = np.column_stack((self.w_list2, w))
 
         loss_sum += loss_function(target, res, loss_type)
         # r = props_to_onehot(res)
@@ -240,9 +244,8 @@ class NN_Model():
 
         # r = np.argmax(r, axis=1)
         r = np.round(res)
-        print(res)
-        # print(r)
-        return r
+
+        return res
 
     def model_score(self, test_x=None, test_y=None):
         if test_x is None:
@@ -281,14 +284,22 @@ class NN_Model():
                 res = self.forward(input[i])
             else:
                 res = np.r_[res, self.forward(input[i])]
-        r = np.round(res)
-        res_1 = props_to_onehot(res)
-        res_1 = np.argmax(res_1, axis=1)
 
-        print(r)
-        print(res)
-        # print(res_1)
+        res_1 = props_to_onehot(res)
+        res_one = np.argmax(res_1, axis=1)
         return res
+
+    def prediction_label(self, input):
+        res = np.array([])
+        for i in range(len(input)):
+            if not len(res) > 0:
+                res = self.forward(input[i])
+            else:
+                res = np.r_[res, self.forward(input[i])]
+
+        res_1 = props_to_onehot(res)
+        res_one = np.argmax(res_1, axis=1)
+        return res_one
 
     def pred(self, input):
         res = np.array([])
@@ -344,13 +355,13 @@ class NN_Model():
         # plt.show()
 
     def check(self, weights=None, bias=None, activation=None):
-        print("")
-        print("[Trainning Result]")
+        # print("")
+        # print("[Trainning Result]")
         print("Number of Layer: ", end='')
         print(self.num_layer, "layers")
 
         if weights:
-            print("Weights: ", end='')
+            print("Weights: ")
             print(*self.weights)
 
         if bias:

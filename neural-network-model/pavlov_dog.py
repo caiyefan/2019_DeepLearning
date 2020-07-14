@@ -3,6 +3,7 @@
 # by Caiye
 import numpy as np
 from matplotlib import pyplot as plt
+import time
 
 n_food = 0
 n_ring = 0
@@ -58,6 +59,7 @@ for i in range(10):
     Wr = np.append(Wr, w_ring)
 
 # Learning1
+print(time.time())
 for i in range(30):
     n_food, n_ring = 1, 1
     n_sali = n_food * w_food + n_ring * w_ring
@@ -76,6 +78,8 @@ for i in range(30):
     Nr = np.append(Nr, n_ring)
     Ns = np.append(Ns, n_sali)
     Wr = np.append(Wr, w_ring)
+
+print(time.time())
 
 # Test2
 for i in range(10):
@@ -234,7 +238,3 @@ plt.plot(Wr)
 plt.ylabel("W_ring")
 plt.ylabel("W_ring")
 plt.show()
-print(Nf)
-print(Nr)
-print(Ns)
-print(Wr)

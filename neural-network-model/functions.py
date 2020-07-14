@@ -7,7 +7,7 @@ from keras.utils import to_categorical
 from sklearn import metrics
 from time import *
 from tqdm import tqdm
-
+import time
 
 def props_to_onehot(props):
     if isinstance(props, list):
@@ -59,8 +59,8 @@ def sigmoid(x, a, b):
     return res
 
 
-def sigmoid_d(x, a, b):
-    res = a * x * (1 - x / b)
+def sigmoid_d(y, a, b):
+    res = a * y * (1 - y / b)
     return res
 
 

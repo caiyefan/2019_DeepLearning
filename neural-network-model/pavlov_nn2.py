@@ -9,9 +9,9 @@ target = np.array([[-1, -1], [-1, 1], [-1, -1], [1, 1]])
 
 model_1 = NN_Model()
 model_1.load_dataset(input, target)
-model_1.add_layer(input_nodes=2, output_nodes=2, activation_type="tanh")
-model_1.add_layer(input_nodes=2, output_nodes=2, activation_type="tanh")
-model_1.learning(epochs=5000, lr=0.05, loss_type="mse")
+model_1.add_layer(input_nodes=2, output_nodes=4, activation_type="tanh")
+model_1.add_layer(input_nodes=4, output_nodes=2, activation_type="tanh")
+model_1.learning(epochs=1000, lr=0.05, loss_type="mse")
 
 model_1.check(weights=True)
 
@@ -25,27 +25,27 @@ model_1.pred(input[2])
 w = np.array([])
 
 print("learning:")
+print(time.time())
 for i in range(50):
-    # res = np.round(model_1.pred(input[3]))
-    res = model_1.train_dog(input[3], target[3])
+    res = np.round(model_1.pred(input[3]))
+    # res = model_1.train_dog(input[3], target[3], loss_type='mse')
     if res[0][0] == 1.0:
-        model_1.train_dog(input[2], target[1])
+        model_1.train_dog(input[2], target[1], loss_type='mse')
     w = np.append(w, model_1.pred(input[2])[0][1])
 
-model_1.check(weights=True)
-model_1.prediction(input)
-
+print(model_1.prediction(input))
+# model_1.check(weights=True)
+print(time.time())
 
 print("forgetting:")
 for i in range(50):
     res = np.round(model_1.pred(input[1]))
     # res = model_1.train_dog(input[1], target[1])
     if res[0][0] == -1.0:
-        model_1.train_dog(input[2], target[2])
+        model_1.train_dog(input[2], target[2], loss_type='mse')
     w = np.append(w, model_1.pred(input[2])[0][1])
 
-model_1.prediction(input)
-
+print(model_1.prediction(input))
 # model_1.check(weights=True)
 
 plt.plot(w)

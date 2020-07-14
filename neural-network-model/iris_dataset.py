@@ -13,10 +13,10 @@ train_x, test_x, train_y, test_y = train_test_split(input, target, test_size=0.2
 
 model = NN_Model()
 model.load_dataset(train_x, train_y, test_x, test_y)
-model.add_layer(input_nodes=4, output_nodes=4, activation_type="sigmoid", train_activation=True)
+model.add_layer(input_nodes=4, output_nodes=4, activation_type="sigmoid")
 # model.add_layer(input_nodes=16, output_nodes=8, activation_type="sigmoid", train_activation=True)
 model.add_layer(input_nodes=4, output_nodes=3, activation_type="softmax")
-model.learning(epochs=500, lr=0.01)
+model.learning(epochs=1000, lr=0.01)
 
 model.check()
 
